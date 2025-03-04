@@ -1,0 +1,100 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Evolution</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+      }
+    }
+    </script>
+</head>
+<body>
+    <div id="app">
+        <div class="game-container">
+            <header>
+                <div class="logo">
+                    <svg class="logo-svg" viewBox="0 0 100 100" width="40" height="40">
+                        <circle class="star" cx="50" cy="50" r="10" fill="#5df5ff" />
+                        <circle class="orbit" cx="50" cy="50" r="20" fill="none" stroke="#3577cc" stroke-width="1" />
+                        <circle class="orbit" cx="50" cy="50" r="35" fill="none" stroke="#3577cc" stroke-width="1" />
+                        <circle class="orbit" cx="50" cy="50" r="45" fill="none" stroke="#3577cc" stroke-width="1" />
+                        <circle class="planet" cx="70" cy="50" r="3" fill="#5f8bc4" />
+                        <circle class="planet" cx="50" cy="85" r="5" fill="#bf5f4c" />
+                        <circle class="planet" cx="15" cy="50" r="4" fill="#8ac47f" />
+                    </svg>
+                    <h1>Stellar Evolution</h1>
+                </div>
+                <status-bar :game-state="gameState"></status-bar>
+            </header>
+            
+            <main>
+                <div class="terminal-window" ref="terminalWindow">
+                    <terminal-output 
+                        :messages="gameMessages" 
+                        :active-tts="activeTTS"
+                        @image-loaded="scrollToBottom">
+                    </terminal-output>
+                </div>
+                
+                <div class="command-section">
+                    <command-input 
+                        :is-loading="isProcessing" 
+                        @submit-command="processCommand">
+                    </command-input>
+                </div>
+            </main>
+            
+            <nav class="game-nav">
+                <button @click="openPanel('resource')" :class="{ active: activePanel === 'resource' }">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M12,3L2,12h3v8h6v-6h2v6h6v-8h3L12,3z"/>
+                    </svg>
+                    Resources
+                </button>
+                <button @click="openPanel('tech')" :class="{ active: activePanel === 'tech' }">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M12,2L4.5,20.29L5.21,21L12,18l6.79,3l0.71-0.71L12,2z"/>
+                    </svg>
+                    Research
+                </button>
+                <button @click="openPanel('explore')" :class="{ active: activePanel === 'explore' }">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <circle fill="currentColor" cx="12" cy="12" r="10" fill-opacity="0.4"/>
+                        <circle fill="currentColor" cx="12" cy="12" r="3"/>
+                    </svg>
+                    Explore
+                </button>
+                <button @click="openPanel('settings')" :class="{ active: activePanel === 'settings' }">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.3L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                    </svg>
+                    Settings
+                </button>
+            </nav>
+            
+            <side-panel 
+                :active-panel="activePanel" 
+                :game-state="gameState"
+                @close="closePanel">
+            </side-panel>
+            
+            <audio-manager 
+                ref="audioManager"
+                :settings="gameState.settings">
+            </audio-manager>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
